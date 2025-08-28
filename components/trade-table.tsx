@@ -24,11 +24,11 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const filteredAndSortedTrades = useMemo(() => {
-    let filtered = trades.filter(trade => {
+    const filtered = trades.filter(trade => {
       const matchesSearch = trade.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           trade.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           trade.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+        trade.notes.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        trade.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+
       switch (filterBy) {
         case 'wins':
           return matchesSearch && trade.pnl && trade.pnl > 0;
@@ -49,7 +49,7 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
 
     return filtered.sort((a, b) => {
       let aVal, bVal;
-      
+
       switch (sortBy) {
         case 'symbol':
           aVal = a.symbol;
@@ -65,7 +65,7 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
           bVal = new Date(b.entryDate).getTime();
           break;
       }
-      
+
       if (sortOrder === 'asc') {
         return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
       } else {
@@ -98,7 +98,7 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
             {filteredAndSortedTrades.length} trades
           </span>
         </CardTitle>
-        
+
         {/* Filters and Search */}
         <div className="flex flex-wrap gap-4">
           <div className="flex items-center space-x-2">
@@ -110,7 +110,7 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
               className="w-64"
             />
           </div>
-          
+
           <Select value={filterBy} onValueChange={setFilterBy}>
             <SelectTrigger className="w-32">
               <Filter className="h-4 w-4 mr-2" />
@@ -147,7 +147,7 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
           </Button>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="overflow-x-auto">
           <Table>
@@ -187,8 +187,8 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
                     {trade.exitPrice ? formatCurrency(trade.exitPrice) : '-'}
                   </TableCell>
                   <TableCell>
-                    {trade.instrumentType === 'forex' || trade.instrumentType === 'commodity' 
-                      ? `${trade.lots || 0} lots` 
+                    {trade.instrumentType === 'forex' || trade.instrumentType === 'commodity'
+                      ? `${trade.lots || 0} lots`
                       : `${trade.size} shares`}
                   </TableCell>
                   <TableCell>
@@ -207,8 +207,8 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
                     {trade.riskRewardRatio ? (
                       <span className={cn(
                         "text-sm font-medium",
-                        trade.riskRewardRatio >= 2 ? "text-green-600" : 
-                        trade.riskRewardRatio >= 1 ? "text-yellow-600" : "text-red-600"
+                        trade.riskRewardRatio >= 2 ? "text-green-600" :
+                          trade.riskRewardRatio >= 1 ? "text-yellow-600" : "text-red-600"
                       )}>
                         1:{trade.riskRewardRatio.toFixed(2)}
                       </span>
@@ -256,7 +256,7 @@ export default function TradeTable({ trades, onEdit, onDelete }: TradeTableProps
             </TableBody>
           </Table>
         </div>
-        
+
         {filteredAndSortedTrades.length === 0 && (
           <div className="text-center py-8 text-muted-foreground">
             No trades found matching your criteria.

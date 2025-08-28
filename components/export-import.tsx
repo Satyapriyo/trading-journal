@@ -23,10 +23,10 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
   const exportToCSV = () => {
     // Create CSV content for trades
     const headers = [
-      'Date', 'Symbol', 'Direction', 'Entry Price', 'Exit Price', 'Size', 
+      'Date', 'Symbol', 'Direction', 'Entry Price', 'Exit Price', 'Size',
       'P&L', 'Commission', 'Status', 'Setup', 'Risk', 'Reward', 'Notes', 'Tags'
     ];
-    
+
     const csvContent = [
       headers.join(','),
       ...trades.map(trade => [
@@ -62,7 +62,7 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
   const exportToJSON = () => {
     const data = storage.exportData();
     const jsonContent = JSON.stringify(data, null, 2);
-    
+
     const blob = new Blob([jsonContent], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -79,29 +79,29 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
 
     try {
       const text = await importFile.text();
-      
+
       if (importFile.name.endsWith('.json')) {
         const data = JSON.parse(text);
-        
+
         // Validate the data structure
         if (!data.trades || !Array.isArray(data.trades) || !data.journal || !Array.isArray(data.journal)) {
           throw new Error('Invalid JSON format. Expected trades and journal arrays.');
         }
-        
+
         storage.importData(data);
         setImportStatus('success');
         setImportMessage(`Successfully imported ${data.trades.length} trades and ${data.journal.length} journal entries. Please refresh the page to see the changes.`);
-        
+
       } else if (importFile.name.endsWith('.csv')) {
         // Parse CSV and convert to trade format
         const lines = text.split('\n');
-        const headers = lines[0].split(',');
-        
+        // const headers = lines[0].split(','); // Removed unused variable
+
         const trades: Trade[] = lines.slice(1)
           .filter(line => line.trim())
-          .map((line, index) => {
+          .map((line) => {
             const values = line.split(',');
-            
+
             return {
               id: crypto.randomUUID(),
               symbol: values[1] || '',
@@ -120,17 +120,18 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
               setup: values[9] || '',
               risk: parseFloat(values[10]) || 0,
               reward: parseFloat(values[11]) || 0,
+              instrumentType: 'stock',
             };
           });
-        
+
         storage.saveTrades(trades);
         setImportStatus('success');
         setImportMessage(`Successfully imported ${trades.length} trades from CSV. Please refresh the page to see the changes.`);
-        
+
       } else {
         throw new Error('Unsupported file format. Please upload a JSON or CSV file.');
       }
-      
+
     } catch (error) {
       setImportStatus('error');
       setImportMessage(error instanceof Error ? error.message : 'Failed to import data. Please check your file format.');
@@ -174,7 +175,7 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
                   {trades.length} trades, {journalEntries.length} entries
                 </span>
               </Button>
-              
+
               <Button onClick={exportToCSV} className="w-full justify-start" variant="outline">
                 <FileText className="h-4 w-4 mr-2" />
                 Export Trades as CSV
@@ -183,7 +184,7 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
                 </span>
               </Button>
             </div>
-            
+
             <div className="text-xs text-muted-foreground space-y-1">
               <p><strong>JSON:</strong> Complete backup including trades and journal entries</p>
               <p><strong>CSV:</strong> Trade data only, compatible with Excel and Google Sheets</p>
@@ -217,16 +218,16 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
                   className="mt-1"
                 />
               </div>
-              
-              <Button 
-                onClick={handleImport} 
+
+              <Button
+                onClick={handleImport}
                 disabled={!importFile}
                 className="w-full"
               >
                 Import Data
               </Button>
             </div>
-            
+
             {importStatus !== 'idle' && (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
@@ -235,7 +236,7 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
                 </AlertDescription>
               </Alert>
             )}
-            
+
             <div className="text-xs text-muted-foreground space-y-1">
               <p><strong>Supported formats:</strong> JSON (full backup), CSV (trades only)</p>
               <p><strong>Note:</strong> Importing will merge with existing data</p>
@@ -265,11 +266,11 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
                 <p>Data stored locally in browser</p>
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <h4 className="font-medium">Actions</h4>
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 size="sm"
                 onClick={clearAllData}
               >
@@ -277,11 +278,11 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
               </Button>
             </div>
           </div>
-          
+
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Important:</strong> Your data is stored locally in your browser. 
+              <strong>Important:</strong> Your data is stored locally in your browser.
               Regular backups are recommended to prevent data loss.
             </AlertDescription>
           </Alert>

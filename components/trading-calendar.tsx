@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+// import { Badge } from '@/components/ui/badge'; // Removed unused import
 import { ChevronLeft, ChevronRight, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 import { Trade } from '@/types/trade';
 import { cn } from '@/lib/utils';
@@ -33,41 +33,41 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
   const { calendarData, weeklyData } = useMemo(() => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    
+
     // Get first day of month and last day of month
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    
+
     // Get first day of calendar (might be from previous month)
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
-    
+
     // Get last day of calendar (might be from next month)
     const endDate = new Date(lastDay);
     endDate.setDate(endDate.getDate() + (6 - lastDay.getDay()));
-    
+
     const days: DayData[] = [];
     const weeks: WeekData[] = [];
     const currentDateIter = new Date(startDate);
-    
+
     let weekNumber = 1;
     let weekPnL = 0;
     let weekDays = 0;
-    
+
     while (currentDateIter <= endDate) {
       const dateStr = currentDateIter.toISOString().split('T')[0];
-      
+
       // Filter trades for this day
       const dayTrades = trades.filter(trade => {
         if (!trade.exitDate || trade.isOpen) return false;
         const tradeDate = new Date(trade.exitDate).toISOString().split('T')[0];
         return tradeDate === dateStr;
       });
-      
+
       const dayPnL = dayTrades.reduce((sum, trade) => sum + (trade.pnl || 0), 0);
       const winningTrades = dayTrades.filter(trade => (trade.pnl || 0) > 0).length;
       const winRate = dayTrades.length > 0 ? (winningTrades / dayTrades.length) * 100 : 0;
-      
+
       days.push({
         date: new Date(currentDateIter),
         pnl: dayPnL,
@@ -75,13 +75,13 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
         winRate,
         isCurrentMonth: currentDateIter.getMonth() === month
       });
-      
+
       // Add to weekly totals
       if (dayTrades.length > 0) {
         weekPnL += dayPnL;
         weekDays++;
       }
-      
+
       // If it's Saturday or the last day, complete the week
       if (currentDateIter.getDay() === 6 || currentDateIter.getTime() === endDate.getTime()) {
         weeks.push({
@@ -94,10 +94,10 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
         weekPnL = 0;
         weekDays = 0;
       }
-      
+
       currentDateIter.setDate(currentDateIter.getDate() + 1);
     }
-    
+
     return { calendarData: days, weeklyData: weeks };
   }, [trades, currentDate]);
 
@@ -107,7 +107,7 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
     const totalTrades = monthTrades.reduce((sum, day) => sum + day.trades, 0);
     const profitableDays = monthTrades.filter(day => day.pnl > 0).length;
     const tradingDays = monthTrades.length;
-    
+
     return {
       totalPnL,
       totalTrades,
@@ -166,7 +166,7 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
             </CardTitle>
             <CardDescription>Daily P&L performance overview</CardDescription>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="text-right">
               <div className="text-sm text-muted-foreground">Monthly stats:</div>
@@ -177,7 +177,7 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
                 <span className="text-muted-foreground">{monthlyStats.tradingDays} days</span>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-1">
               <Button variant="outline" size="sm" onClick={() => navigateMonth('prev')}>
                 <ChevronLeft className="h-4 w-4" />
@@ -192,7 +192,7 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="flex gap-6">
           {/* Calendar */}
@@ -204,12 +204,12 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
                 </div>
               ))}
             </div>
-            
+
             <div className="grid grid-cols-7 gap-1">
               {calendarData.map((day, index) => {
                 const isToday = day.date.toDateString() === new Date().toDateString();
                 const hasTrades = day.trades > 0;
-                
+
                 return (
                   <div
                     key={index}
@@ -232,7 +232,7 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
                           <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         )}
                       </div>
-                      
+
                       {hasTrades && (
                         <div className="flex-1 flex flex-col justify-between">
                           <div className="space-y-1">
@@ -246,7 +246,7 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
                               {day.trades} trade{day.trades !== 1 ? 's' : ''}
                             </div>
                           </div>
-                          
+
                           <div className="text-xs text-muted-foreground">
                             {day.winRate.toFixed(0)}%
                           </div>
@@ -268,9 +268,9 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
                 key={index}
                 className={cn(
                   "px-3 py-[1.3rem] rounded-lg border gap-1 text-center transition-all hover:shadow-sm",
-                  week.pnl > 0 ? "bg-green-50 border-green-200" : 
-                  week.pnl < 0 ? "bg-red-50 border-red-200" : 
-                  "bg-gray-50 border-gray-200"
+                  week.pnl > 0 ? "bg-green-50 border-green-200" :
+                    week.pnl < 0 ? "bg-red-50 border-red-200" :
+                      "bg-gray-50 border-gray-200"
                 )}
               >
                 <div className="text-xs font-medium text-muted-foreground mb-1">
@@ -278,9 +278,9 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
                 </div>
                 <div className={cn(
                   "text-sm font-bold",
-                  week.pnl > 0 ? "text-green-500" : 
-                  week.pnl < 0 ? "text-red-500" : 
-                  "text-gray-600"
+                  week.pnl > 0 ? "text-green-500" :
+                    week.pnl < 0 ? "text-red-500" :
+                      "text-gray-600"
                 )}>
                   {formatCurrency(week.pnl)}
                 </div>
@@ -291,7 +291,7 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
             ))}
           </div>
         </div>
-        
+
         {/* Legend */}
         <div className="flex items-center justify-between mt-6 pt-4 border-t">
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -308,7 +308,7 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
               <span>No trades</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1">
               <TrendingUp className="h-4 w-4 text-green-600" />

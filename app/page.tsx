@@ -17,6 +17,7 @@ import TradingCalendar from '@/components/trading-calendar';
 import Sidebar from '@/components/sidebar';
 import { TrendingUp, BarChart3, BookOpen, DollarSign } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Trade } from '@/types/trade';
 
 export default function TradingJournalApp() {
   const { trades, loading: tradesLoading, addTrade, updateTrade, deleteTrade } = useTrades();
@@ -24,10 +25,10 @@ export default function TradingJournalApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isTradeDialogOpen, setIsTradeDialogOpen] = useState(false);
   const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
-  
+
   const metrics = calculateMetrics(trades);
   const openTrades = trades.filter(trade => trade.isOpen);
-  const closedTrades = trades.filter(trade => !trade.isOpen);
+  // const closedTrades = trades.filter(trade => !trade.isOpen); // Removed unused variable
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -65,7 +66,7 @@ export default function TradingJournalApp() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -77,7 +78,7 @@ export default function TradingJournalApp() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -89,7 +90,7 @@ export default function TradingJournalApp() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -173,8 +174,8 @@ export default function TradingJournalApp() {
 
       case 'trades':
         return (
-          <TradeTable 
-            trades={trades} 
+          <TradeTable
+            trades={trades}
             onEdit={setEditingTrade}
             onDelete={deleteTrade}
           />
@@ -185,7 +186,7 @@ export default function TradingJournalApp() {
 
       case 'journal':
         return (
-          <JournalEntries 
+          <JournalEntries
             entries={entries}
             onAdd={addEntry}
             onUpdate={updateEntry}
@@ -207,7 +208,7 @@ export default function TradingJournalApp() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
       {/* Sidebar */}
-      <Sidebar 
+      <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onAddTrade={() => setIsTradeDialogOpen(true)}
@@ -229,15 +230,15 @@ export default function TradingJournalApp() {
               Enter your trade details to start tracking your performance
             </DialogDescription>
           </DialogHeader>
-          <TradeForm 
+          <TradeForm
             onSubmit={(trade) => {
               addTrade(trade);
               setIsTradeDialogOpen(false);
-            }} 
+            }}
           />
         </DialogContent>
       </Dialog>
-      
+
       {/* Edit Trade Dialog */}
       <TradeEditDialog
         trade={editingTrade}

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,  ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Trade } from '@/types/trade';
 import { generateEquityCurve } from '@/lib/calculations';
 
@@ -11,9 +11,9 @@ interface AnalyticsChartProps {
 
 export default function AnalyticsChart({ trades }: AnalyticsChartProps) {
   const equityCurveData = generateEquityCurve(trades);
-  
+
   const closedTrades = trades.filter(trade => !trade.isOpen && trade.pnl !== null);
-  
+
   // Monthly P&L data
   const monthlyData = closedTrades.reduce((acc, trade) => {
     const month = new Date(trade.exitDate!).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
@@ -77,22 +77,22 @@ export default function AnalyticsChart({ trades }: AnalyticsChartProps) {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={equityCurveData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   tick={{ fontSize: 12 }}
                   angle={-45}
                   textAnchor="end"
                   height={60}
                 />
                 <YAxis tickFormatter={formatCurrency} />
-                <Tooltip 
+                <Tooltip
                   formatter={(value: number) => [formatCurrency(value), 'P&L']}
                   labelFormatter={(label) => `Date: ${label}`}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="pnl" 
-                  stroke="#2563eb" 
+                <Line
+                  type="monotone"
+                  dataKey="pnl"
+                  stroke="#2563eb"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                 />
@@ -115,12 +115,11 @@ export default function AnalyticsChart({ trades }: AnalyticsChartProps) {
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" />
                   <YAxis tickFormatter={formatCurrency} />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: number) => [formatCurrency(value), 'P&L']}
                   />
-                  <Bar 
-                    dataKey="pnl" 
-                    fill={(entry) => entry > 0 ? "#10B981" : "#EF4444"}
+                  <Bar
+                    dataKey="pnl"
                     radius={[4, 4, 0, 0]}
                   >
                     {monthlyChartData.map((entry, index) => (

@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { 
-  TrendingUp, 
-  BarChart3, 
-  BookOpen, 
-  Settings, 
-  Plus, 
-  DollarSign,
-  Calendar,
+import {
+  TrendingUp,
+  BarChart3,
+  BookOpen,
+  Settings,
+  Plus,
+  // DollarSign, // Removed unused import
+  // Calendar, // Removed unused import
   PieChart,
   Menu,
   X
@@ -68,12 +68,12 @@ export default function Sidebar({ activeTab, onTabChange, onAddTrade }: SidebarP
     <>
       {/* Mobile overlay */}
       {!isCollapsed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsCollapsed(true)}
         />
       )}
-      
+
       {/* Sidebar */}
       <div className={cn(
         "fixed left-0 top-0 z-50 h-full bg-white border-r border-slate-200 transition-all duration-300 flex flex-col",
@@ -106,7 +106,7 @@ export default function Sidebar({ activeTab, onTabChange, onAddTrade }: SidebarP
 
         {/* Add Trade Button */}
         <div className="p-4">
-          <Button 
+          <Button
             onClick={onAddTrade}
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             size={isCollapsed ? "sm" : "default"}
@@ -122,7 +122,7 @@ export default function Sidebar({ activeTab, onTabChange, onAddTrade }: SidebarP
             {navigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
-              
+
               return (
                 <Button
                   key={item.id}

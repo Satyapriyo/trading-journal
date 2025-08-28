@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PerformanceMetrics } from '@/types/trade';
-import { TrendingUp, TrendingDown, Target, DollarSign, Percent, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, DollarSign,  BarChart3 } from 'lucide-react';
 
 interface PerformanceMetricsProps {
   metrics: PerformanceMetrics;
@@ -25,12 +25,11 @@ export default function PerformanceMetricsComponent({ metrics }: PerformanceMetr
     title, 
     value, 
     icon: Icon, 
-    trend,
     description 
   }: { 
     title: string;
     value: string;
-    icon: any;
+    icon: React.ComponentType<{ className?: string }>;
     trend?: 'positive' | 'negative' | 'neutral';
     description?: string;
   }) => (
