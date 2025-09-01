@@ -12,13 +12,40 @@ export const calculatePnL = (trade: Trade): number => {
         ? trade.exitPrice - trade.entryPrice
         : trade.entryPrice - trade.exitPrice;
 
-    const lots = trade.lots || 1;
-    // const lotSize = trade.lotSize || 100000; // Standard lot - Removed unused variable
-    const pipValue = trade.pipValue || 10; // Default $10 per pip for standard lot
+    const lots = trade.lots || 1; // Number of lots (e.g., 0.1, 1, 2)
+    const lotSize = trade.lotSize || 100000; // Units per lot (standard = 100,000)
 
-    // Convert price difference to pips (assuming 4-decimal pairs like EUR/USD)
-    const pips = pipDifference * 10000;
-    pnl = pips * pipValue * lots;
+    // Calculate pip value based on lot size and currency pair
+    // For USD pairs: Pip Value = (0.0001 / Exchange Rate) * Lot Size * Number of Lots
+    // For pairs ending in USD: Pip Value = 0.0001 * Lot Size * Number of Lots
+    let pipValue = trade.pipValue;
+
+    if (!pipValue) {
+      // Default pip value calculation for USD pairs
+      if (trade.symbol.endsWith("USD")) {
+        // For pairs like EUR/USD, GBP/USD
+        pipValue = 0.0001 * lotSize * lots;
+      } else if (trade.symbol.startsWith("USD")) {
+        // For pairs like USD/JPY, USD/CHF
+        // This is simplified - in reality you'd need the current exchange rate
+        pipValue = (0.0001 / trade.exitPrice) * lotSize * lots;
+      } else {
+        // Cross pairs - simplified calculation
+        pipValue = 0.0001 * lotSize * lots;
+      }
+    }
+
+    // Convert price difference to pips
+    let pips = 0;
+    if (trade.symbol.includes("JPY")) {
+      // JPY pairs have 2 decimal places, so pip = 0.01
+      pips = pipDifference * 100;
+    } else {
+      // Most pairs have 4 decimal places, so pip = 0.0001
+      pips = pipDifference * 10000;
+    }
+
+    pnl = pips * (pipValue / (lotSize * lots)); // Normalize pip value
   } else if (trade.instrumentType === "commodity") {
     // Commodity P&L calculation
     const priceDifference =
@@ -49,6 +76,59 @@ export const calculateRiskRewardRatio = (
 ): number => {
   if (risk <= 0) return 0;
   return reward / risk;
+};
+
+// Calculate risk-reward ratio for forex trades based on entry, stop loss, and take profit
+export const calculateForexRiskReward = (
+  entryPrice: number,
+  stopLoss: number,
+  takeProfit: number,
+  direction: "long" | "short"
+): { risk: number; reward: number; ratio: number } => {
+  let risk = 0;
+  let reward = 0;
+
+  if (direction === "long") {
+    risk = Math.abs(entryPrice - stopLoss);
+    reward = Math.abs(takeProfit - entryPrice);
+  } else {
+    risk = Math.abs(stopLoss - entryPrice);
+    reward = Math.abs(entryPrice - takeProfit);
+  }
+
+  const ratio = risk > 0 ? reward / risk : 0;
+
+  return { risk, reward, ratio };
+};
+
+// Calculate lot size based on risk percentage and stop loss
+export const calculateForexLotSize = (
+  accountBalance: number,
+  riskPercentage: number, // e.g., 2 for 2%
+  entryPrice: number,
+  stopLoss: number,
+  pipValue: number = 10 // Default for standard lot
+): number => {
+  const riskAmount = (accountBalance * riskPercentage) / 100;
+
+  let pipsAtRisk = 0;
+  const priceDifference = Math.abs(entryPrice - stopLoss);
+
+  // Calculate pips at risk based on currency pair
+  if (entryPrice > 10) {
+    // Likely JPY pair (2 decimal places)
+    pipsAtRisk = priceDifference * 100;
+  } else {
+    // Most other pairs (4 decimal places)
+    pipsAtRisk = priceDifference * 10000;
+  }
+
+  if (pipsAtRisk === 0) return 0;
+
+  // Lot size = Risk Amount / (Pips at Risk × Pip Value)
+  const calculatedLots = riskAmount / (pipsAtRisk * pipValue);
+
+  return Math.round(calculatedLots * 100) / 100; // Round to 2 decimal places
 };
 
 export const calculateMetrics = (trades: Trade[]): PerformanceMetrics => {
