@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Download, Upload, FileText, Database, AlertCircle } from 'lucide-react';
 import { Trade, JournalEntry } from '@/types/trade';
 import { storage } from '@/lib/storage';
+import { useToast } from '@/hooks/use-toast';
 
 interface ExportImportProps {
   trades: Trade[];
@@ -196,6 +197,7 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importStatus, setImportStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [importMessage, setImportMessage] = useState('');
+  const { toast } = useToast();
 
   const exportToCSV = () => {
     // Create CSV content for trades
@@ -343,8 +345,11 @@ export default function ExportImport({ trades, journalEntries }: ExportImportPro
     if (window.confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
       localStorage.removeItem('trade-journal-trades');
       localStorage.removeItem('trade-journal-entries');
-      setImportStatus('success');
-      setImportMessage('All data has been cleared. Please refresh the page.');
+
+      toast({
+        title: "Data Cleared Successfully",
+        description: "All trades and journal entries have been cleared. Please refresh the page to see changes.",
+      });
     }
   };
 

@@ -219,104 +219,121 @@ export default function TradingCalendar({ trades }: TradingCalendarProps) {
       </CardHeader>
 
       <CardContent>
-        <div className="flex flex-col xl:flex-row gap-6">
-          {/* Calendar */}
-          <div className="flex-1">
-            <div className="grid grid-cols-7 gap-1 mb-4">
+        <div className="space-y-6">
+          {/* Calendar with integrated weekly summary */}
+          <div className="w-full">
+            {/* Header with days and weekly label */}
+            <div className="grid grid-cols-8 gap-1 sm:gap-2 mb-4">
               {weekDays.map(day => (
                 <div key={day} className="p-1 sm:p-2 text-center text-xs sm:text-sm font-medium text-muted-foreground">
-                  {day}
+                  <span className="hidden sm:inline">{day}</span>
+                  <span className="sm:hidden">{day.slice(0, 2)}</span>
                 </div>
               ))}
+              <div className="p-1 sm:p-2 text-center text-xs sm:text-sm font-medium text-muted-foreground">
+                <span className="hidden sm:inline">Week P&L</span>
+                <span className="sm:hidden">Week</span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-1">
-              {calendarData.map((day, index) => {
-                const isToday = day.date.toDateString() === new Date().toDateString();
-                const hasTrades = day.trades > 0;
+            {/* Calendar rows with weekly summary */}
+            <div className="space-y-1 sm:space-y-2">
+              {Array.from({ length: Math.ceil(calendarData.length / 7) }, (_, weekIndex) => {
+                const weekStart = weekIndex * 7;
+                const weekDays = calendarData.slice(weekStart, weekStart + 7);
+                const weekData = weeklyData[weekIndex];
 
                 return (
-                  <div
-                    key={index}
-                    onClick={() => handleDayClick(day)}
-                    className={cn(
-                      "relative p-1 sm:p-2 min-h-[60px] sm:min-h-[80px] lg:min-h-[100px] border rounded-lg transition-all hover:shadow-sm",
-                      !day.isCurrentMonth && "opacity-40",
-                      isToday && "ring-1 sm:ring-2 ring-blue-500 dark:ring-blue-400",
-                      hasTrades ? getPnLColor(day.pnl) + " cursor-pointer hover:shadow-md" : "bg-gray-50 border-gray-200 dark:bg-slate-800 dark:border-slate-700"
-                    )}
-                  >
-                    <div className="flex flex-col h-full">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={cn(
-                          "text-xs sm:text-sm font-medium",
-                          !day.isCurrentMonth && "text-muted-foreground",
-                          day.isCurrentMonth && "dark:text-slate-200"
-                        )}>
-                          {day.date.getDate()}
-                        </span>
-                        {isToday && (
-                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full"></div>
-                        )}
-                      </div>
+                  <div key={weekIndex} className="grid grid-cols-8 gap-1 sm:gap-2">
+                    {/* Days of the week */}
+                    {weekDays.map((day, dayIndex) => {
+                      const isToday = day.date.toDateString() === new Date().toDateString();
+                      const hasTrades = day.trades > 0;
 
-                      {hasTrades && (
-                        <div className="flex-1 flex flex-col justify-between">
-                          <div className="space-y-0.5 sm:space-y-1">
-                            <div className={cn(
-                              "text-xs sm:text-sm font-bold",
-                              day.pnl > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
-                            )}>
-                              {formatCurrency(day.pnl)}
+                      return (
+                        <div
+                          key={weekStart + dayIndex}
+                          onClick={() => handleDayClick(day)}
+                          className={cn(
+                            "relative p-1 sm:p-2 border rounded transition-all hover:shadow-sm flex flex-col",
+                            "w-full h-16 sm:h-20 md:h-24 lg:h-28", // Smaller responsive heights to fit screen
+                            !day.isCurrentMonth && "opacity-40",
+                            isToday && "ring-1 sm:ring-2 ring-blue-500 dark:ring-blue-400",
+                            hasTrades ? getPnLColor(day.pnl) + " cursor-pointer hover:shadow-md" : "bg-gray-50 border-gray-200 dark:bg-slate-800 dark:border-slate-700"
+                          )}
+                        >
+                          <div className="flex flex-col h-full">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className={cn(
+                                "text-xs sm:text-sm font-medium",
+                                !day.isCurrentMonth && "text-muted-foreground",
+                                day.isCurrentMonth && "dark:text-slate-200"
+                              )}>
+                                {day.date.getDate()}
+                              </span>
+                              {isToday && (
+                                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-blue-500 rounded-full"></div>
+                              )}
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              {day.trades} trade{day.trades !== 1 ? 's' : ''}
-                            </div>
-                          </div>
 
-                          <div className="text-xs text-muted-foreground">
-                            {day.winRate.toFixed(0)}%
+                            {hasTrades && (
+                              <div className="flex-1 flex flex-col justify-between">
+                                <div className="space-y-0.5 sm:space-y-1">
+                                  <div className={cn(
+                                    "text-xs font-bold",
+                                    day.pnl > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                                  )}>
+                                    {formatCurrency(day.pnl)}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    <span className="hidden sm:inline">{day.trades} trade{day.trades !== 1 ? 's' : ''}</span>
+                                    <span className="sm:hidden">{day.trades}T</span>
+                                  </div>
+                                </div>
+
+                                <div className="text-xs text-muted-foreground">
+                                  {day.winRate.toFixed(0)}%
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
-                      )}
-                    </div>
+                      );
+                    })}
+
+                    {/* Weekly summary for this row */}
+                    {weekData && (
+                      <div
+                        className={cn(
+                          "p-1 sm:p-2 rounded border text-center transition-all hover:shadow-sm flex flex-col",
+                          "w-full h-16 sm:h-20 md:h-24 lg:h-28", // Match day cell heights
+                          weekData.pnl > 0 ? "bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800" :
+                            weekData.pnl < 0 ? "bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800" :
+                              "bg-gray-50 border-gray-200 dark:bg-slate-800 dark:border-slate-700"
+                        )}
+                      >
+                        <div className="flex flex-col h-full justify-center">
+                          <div className="text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">
+                            W{weekIndex + 1}
+                          </div>
+                          <div className={cn(
+                            "text-xs sm:text-sm font-bold mb-0.5 sm:mb-1",
+                            weekData.pnl > 0 ? "text-green-600 dark:text-green-400" :
+                              weekData.pnl < 0 ? "text-red-600 dark:text-red-400" :
+                                "text-gray-600 dark:text-slate-300"
+                          )}>
+                            {formatCurrency(weekData.pnl)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            <span className="hidden sm:inline">{weekData.days} day{weekData.days !== 1 ? 's' : ''}</span>
+                            <span className="sm:hidden">{weekData.days}D</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
-            </div>
-          </div>
-
-          {/* Weekly Summary */}
-          <div className="w-full xl:w-32 space-y-1">
-            <div className="text-sm font-medium text-muted-foreground mb-3">Weekly P&L</div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-1 gap-2 xl:gap-1">
-              <div className="xl:h-4"></div>
-              {weeklyData.map((week, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    "px-2 sm:px-3 py-2 sm:py-[1.3rem] xl:py-[1.3rem] rounded-lg border text-center transition-all hover:shadow-sm",
-                    week.pnl > 0 ? "bg-green-50 border-green-200 dark:bg-green-900/30 dark:border-green-800" :
-                      week.pnl < 0 ? "bg-red-50 border-red-200 dark:bg-red-900/30 dark:border-red-800" :
-                        "bg-gray-50 border-gray-200 dark:bg-slate-800 dark:border-slate-700"
-                  )}
-                >
-                  <div className="text-xs font-medium text-muted-foreground mb-1">
-                    {week.label}
-                  </div>
-                  <div className={cn(
-                    "text-xs sm:text-sm font-bold",
-                    week.pnl > 0 ? "text-green-600 dark:text-green-400" :
-                      week.pnl < 0 ? "text-red-600 dark:text-red-400" :
-                        "text-gray-600 dark:text-slate-300"
-                  )}>
-                    {formatCurrency(week.pnl)}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {week.days} day{week.days !== 1 ? 's' : ''}
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>

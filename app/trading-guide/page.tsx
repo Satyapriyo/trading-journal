@@ -5,26 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
-import Lenis from "lenis";
+
 
 export default function TradingGuidePage() {
-  useEffect(() => {
-    // Initialize Lenis only on client side
-    const lenis = new Lenis({
-      autoRaf: true,
-    });
 
-    // Listen for the scroll event and log the event data
-    lenis.on('scroll', (e) => {
-      console.log(e);
-    });
-
-    // Cleanup function to destroy lenis instance
-    return () => {
-      lenis.destroy();
-    };
-  }, []);
   return (
     <motion.div
       className="min-h-screen bg-background"
